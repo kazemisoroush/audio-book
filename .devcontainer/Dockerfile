@@ -13,3 +13,16 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 
 # Create python symlink for convenience
 RUN ln -sf /usr/local/bin/python3 /usr/local/bin/python
+
+# Pre-install Python dependencies so agents and developers never need to
+# run pip install manually. This layer is cached until pyproject.toml changes.
+#
+# Pattern: copy only the dependency spec, create a minimal package stub so
+# pip can resolve the editable install, install everything, then clean up.
+# The actual source is mounted at runtime by the devcontainer.
+WORKDIR /tmp/audiobook-deps
+COPY pyproject.toml .
+RUN mkdir -p src/audiobook \
+    && touch src/audiobook/__init__.py \
+    && pip install --no-cache-dir -e ".[dev]" \
+    && rm -rf /tmp/audiobook-deps
