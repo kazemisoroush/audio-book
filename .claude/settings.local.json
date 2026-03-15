@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /workspaces/audio-book branch -m main)",
+      "Bash(gh auth status 2>&1)",
+      "Bash(git add -A && git status)"
+    ]
+  }
+}

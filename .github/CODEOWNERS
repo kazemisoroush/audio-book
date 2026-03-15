@@ -1,0 +1,18 @@
+# CODEOWNERS — defines who is notified for reviews by path.
+#
+# In this project agents do most review work. CODEOWNERS ensures humans
+# are looped in for changes to the harness itself (docs, CI, architecture).
+#
+# Syntax: <pattern> <owner> [<owner> ...]
+# Last matching rule wins.
+
+# Default: all changes notify the team
+*                           @kazemisoroush
+
+# Harness files — always require human review, not just agent review
+AGENTS.md                   @kazemisoroush
+ARCHITECTURE.md             @kazemisoroush
+docs/design-docs/           @kazemisoroush
+docs/product-specs/         @kazemisoroush
+.github/                    @kazemisoroush
+pyproject.toml              @kazemisoroush

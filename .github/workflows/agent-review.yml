@@ -1,0 +1,67 @@
+name: Agent Review
+
+# Triggers:
+#   1. Automatic: runs on every new PR and every push to an open PR
+#   2. On-demand: comment "@claude <question or instruction>" on any PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]
+
+jobs:
+  review:
+    name: Claude review
+    runs-on: ubuntu-latest
+    # Only run on PRs (issue_comment fires on issues too)
+    if: |
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request != null &&
+       contains(github.event.comment.body, '@claude'))
+
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history so the agent can see diffs
+
+      - uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+          # Automatic review prompt — used when triggered by a PR event.
+          # On @claude comments the agent uses the comment text as its prompt.
+          direct_prompt: |
+            You are a code reviewer for the audiobook generator project.
+            Review this pull request against the project's core principles.
+
+            Before reviewing, read:
+            - AGENTS.md (working model and non-negotiables)
+            - ARCHITECTURE.md (layer model and dependency rules)
+            - docs/design-docs/core-beliefs.md (all 10 beliefs)
+            - docs/DESIGN.md (CUPID properties)
+
+            Check specifically for:
+            1. **TDD**: Are tests written alongside or before the implementation?
+               Flag any new public function in domain/ or types/ that lacks a test.
+            2. **Layer violations**: Does any module import from a layer to its right?
+               (e.g. domain/ importing from adapters/)
+            3. **Determinism**: Any use of datetime.now(), unseeded random(), or
+               unstable iteration order in domain/ or services/?
+            4. **Pydantic boundaries**: Any raw dicts crossing module edges?
+            5. **CUPID — Domain vocabulary**: Do names match the audiobook domain
+               (chapter, speaker, dialogue, narration, voice, segment)?
+            6. **Module docstrings**: Do new modules have a docstring answering:
+               what it does, what it doesn't do, its constraints, its layer?
+            7. **Bare print()**: Any print() calls outside of cli/?
+
+            For each issue found, cite the file and line number and suggest
+            the specific fix. If everything looks good, say so briefly.
+
+            Do not repeat the PR summary back. Focus on substance.

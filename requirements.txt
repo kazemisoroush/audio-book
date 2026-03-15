@@ -1,0 +1,2 @@
+# Runtime dependencies — pinned versions added by agents as implementation proceeds
+# Run: pip install -e ".[dev]" to install everything from pyproject.toml
