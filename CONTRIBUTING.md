@@ -114,8 +114,33 @@ gh api repos/{owner}/audio-book/branches/main/protection \
 }
 EOF
 
-# 4. Add the Claude API key secret for agent review
-gh secret set ANTHROPIC_API_KEY --body "$ANTHROPIC_API_KEY"
+# 4. Add AWS credentials for agent review (Bedrock)
+#    See "AWS credentials setup" below for the required IAM policy.
+gh secret set AWS_ACCESS_KEY_ID     --body "<your-access-key-id>"
+gh secret set AWS_SECRET_ACCESS_KEY --body "<your-secret-access-key>"
+```
+
+## AWS credentials setup (for agent review workflow)
+
+The agent review workflow authenticates to AWS Bedrock using static IAM
+credentials stored as GitHub Actions secrets.
+
+Required secrets (set once per repo):
+```bash
+gh secret set AWS_ACCESS_KEY_ID     --body "<your-access-key-id>"
+gh secret set AWS_SECRET_ACCESS_KEY --body "<your-secret-access-key>"
+```
+
+The IAM user needs this policy attached:
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Action": ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"],
+    "Resource": "arn:aws:bedrock:us-east-1::foundation-model/anthropic.*"
+  }]
+}
 ```
 
 ## What agents must never do
