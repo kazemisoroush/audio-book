@@ -14,5 +14,6 @@ AGENTS.md                   @kazemisoroush
 ARCHITECTURE.md             @kazemisoroush
 docs/design-docs/           @kazemisoroush
 docs/product-specs/         @kazemisoroush
+docs/agents/                @kazemisoroush
 .github/                    @kazemisoroush
 pyproject.toml              @kazemisoroush

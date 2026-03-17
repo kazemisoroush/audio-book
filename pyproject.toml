@@ -1,6 +1,6 @@
 [build-system]
 requires = ["setuptools>=68", "wheel"]
-build-backend = "setuptools.backends.legacy:build"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "audiobook"
@@ -23,7 +23,6 @@ dev = [
     "mypy>=1.10",
     "ruff>=0.5",
     "build>=1.2",
-    "types-all",
 ]
 
 [project.scripts]

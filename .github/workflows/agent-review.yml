@@ -31,9 +31,15 @@ jobs:
         with:
           fetch-depth: 0  # full history so the agent can see diffs
 
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
       - uses: anthropics/claude-code-action@beta
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          use_bedrock: "true"
 
           # Automatic review prompt — used when triggered by a PR event.
           # On @claude comments the agent uses the comment text as its prompt.

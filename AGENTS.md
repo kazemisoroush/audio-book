@@ -20,6 +20,7 @@ audio file per book.
 | Quality grades | [docs/QUALITY_SCORE.md](docs/QUALITY_SCORE.md) |
 | Security rules | [docs/SECURITY.md](docs/SECURITY.md) |
 | ElevenLabs API patterns | [docs/references/elevenlabs-reference.md](docs/references/elevenlabs-reference.md) |
+| Agent fleet | [docs/agents/index.md](docs/agents/index.md) |
 
 ## Working model
 **Humans steer. Agents execute.**
@@ -39,20 +40,28 @@ before implementation, involves external APIs, or could take more than one
 agent session.
 
 ## Development workflow
+
+Dependencies are pre-installed in the Docker image — do not run `pip install`
+at the start of every task. The environment is ready when you start.
+
 ```bash
-# Install dependencies
-pip install -e ".[dev]"
-
 # Run tests (must pass before any PR)
-pytest tests/ -v
+pytest -v
 
-# Lint (must pass before any PR)
+# Lint and type-check (must pass before any PR)
 ruff check src/ tests/
 mypy src/
 
-# Run the CLI
-python -m audiobook.cli --help
+# Build and verify CLI entry point
+python -m build
+audiobook --help
 ```
+
+If you add a new dependency to `pyproject.toml`, run:
+```bash
+pip install --quiet -e ".[dev]"
+```
+This is the only time a manual pip install is needed.
 
 ## Non-negotiables (enforced mechanically)
 1. **TDD — test first, always** — write a failing test before any implementation; see core-beliefs #8

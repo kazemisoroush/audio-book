@@ -5,18 +5,17 @@ echo "Configuring Git..."
 git config --global user.email 'kazemi.soroush@gmail.com'
 git config --global user.name 'Soroush Kazemi'
 
-echo "Installing Python dependencies..."
-pip install -e ".[dev]"
+# Dependencies are pre-installed in the Docker image (see Dockerfile).
+# This re-registers the package in editable mode against the mounted source.
+# It is fast — pip skips deps that are already satisfied.
+echo "Registering package in editable mode..."
+pip install --quiet --no-deps -e ".[dev]"
 
-echo "Running tests..."
-python -m pytest tests/ -v
-
 echo ""
-echo "Post-create setup complete!"
+echo "Post-create setup complete. Dependencies are ready."
 echo ""
-echo "To generate an audiobook:"
-echo "  audiobook books/pg1342.txt --discover-characters"
-echo "  audiobook books/pg1342.txt"
-echo ""
-echo "For more options:"
+echo "Common commands:"
 echo "  audiobook --help"
+echo "  pytest -v"
+echo "  ruff check src/ tests/"
+echo "  mypy src/"
