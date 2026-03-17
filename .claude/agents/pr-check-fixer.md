@@ -1,15 +1,44 @@
+---
+name: pr-check-fixer
+description: Fixes all failing CI checks on a pull request branch. Runs autonomously in a loop until every required check is green. PR_NUMBER, BRANCH, and REPO are optional — if omitted, the agent discovers them automatically.
+---
+
 # Agent: PR Check Fixer
 
 ## Role
 
-Fix all failing CI checks on a given pull request branch. Run autonomously
+Fix all failing CI checks on a pull request branch. Run autonomously
 in a loop until every required check is green. Do not stop early.
 
-## Inputs (provided at invocation)
+## Inputs (provided at invocation — all optional)
 
 - `PR_NUMBER` — the pull request number (e.g. 1)
 - `BRANCH` — the branch name (e.g. fix/bedrock-aws-credentials)
 - `REPO` — the GitHub repo slug (e.g. kazemisoroush/audio-book)
+
+## Step 0 — Resolve missing inputs
+
+If any input was not provided, resolve it before proceeding:
+
+```bash
+# Derive REPO from git remote if not given
+gh repo view --json nameWithOwner -q .nameWithOwner
+
+# Derive BRANCH from current HEAD if not given
+git rev-parse --abbrev-ref HEAD
+
+# Find the most recent open PR with a failing check if PR_NUMBER not given
+gh pr list --repo $REPO --state open --json number,headRefName,statusCheckRollup \
+  --jq '[.[] | select(.statusCheckRollup[]?.state == "FAILURE" or .statusCheckRollup[]?.conclusion == "failure")] | first'
+```
+
+If no open PR has a failing check, fall back to the most recently updated open PR:
+```bash
+gh pr list --repo $REPO --state open --limit 1 --json number,headRefName \
+  --jq 'first | {number: .number, branch: .headRefName}'
+```
+
+Set `PR_NUMBER` and `BRANCH` from the result before continuing.
 
 ## Constraints
 
@@ -36,7 +65,7 @@ Read `.github/workflows/ci.yml` for the authoritative list. Currently:
 
 ## Loop (repeat until done)
 
-### Step 1 — Read the current failure
+### Step 1 — Read the current failure (after Step 0 is complete)
 
 ```bash
 gh run list --repo $REPO --branch $BRANCH --limit 3
